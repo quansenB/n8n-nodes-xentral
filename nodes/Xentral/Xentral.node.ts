@@ -1,14 +1,13 @@
-import { IExecuteFunctions } from 'n8n-core';
+import { IExecuteFunctions } from "n8n-core";
 
 import {
 	IDataObject,
 	INodeTypeDescription,
 	INodeExecutionData,
-	INodeType,
-	GenericValue
-} from 'n8n-workflow';
+	INodeType
+} from "n8n-workflow";
 
-import { xentralRequest } from './GenericFunctions';
+import { xentralRequest } from "./GenericFunctions";
 
 function prepareBodyOldApi(body: IDataObject): IDataObject {
 	for(const property in body){
@@ -30,179 +29,519 @@ function prepareBodyOldApi(body: IDataObject): IDataObject {
 
 export class Xentral implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Xentral',
-		name: 'xentral',
-		icon: 'file:xentral.png',
-		group: ['transform'],
+		displayName: "Xentral",
+		name: "xentral",
+		icon: "file:xentral.png",
+		group: ["transform"],
 		version: 1,
-		description: 'Xentral CRM Node',
+		description: "Xentral CRM Node",
 		defaults: {
-			name: 'Xentral',
-			color: '#42b8c5'
+			name: "Xentral",
+			color: "#42b8c5"
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: ["main"],
+		outputs: ["main"],
 		credentials: [
 			{
-				name: 'xentral',
+				name: "xentral",
 				required: true
 			}
 		],
-
 
 		properties: [
 			// ----------------------------------
 			// 				Resources
 			// ----------------------------------
 			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
+				displayName: "Resource",
+				name: "resource",
+				type: "options",
 				options: [
 					{
-						name: 'Auftrag (v1)',
-						value: 'order'
+						name: "Order",
+						value: "order"
 					},
-					/* {
-						name: 'Addresses',
-						value: 'addresses'
-					} */
+					{
+						name: "Address",
+						value: "address"
+					}
 				],
-				default: 'order',
-				description: 'The resource to operate on.'
+				default: "order",
+				description: "The resource to operate on."
 			},
 
 			// ----------------------------------
 			// 				order
 			// ----------------------------------
 			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
+				displayName: "Operation",
+				name: "operation",
+				type: "options",
 				displayOptions: {
 					show: {
-						resource: ['order']
+						resource: ["order"]
 					}
 				},
 				options: [
 					{
-						name: 'Create',
-						value: 'create',
-						description: 'Create an order'
+						name: "Create",
+						value: "create",
+						description: "Create an order"
 					},
 					{
-						name: 'Edit',
-						value: 'update',
-						description: 'Update an order'
+						name: "Update",
+						value: "update",
+						description: "Update an order"
 					},
 					{
-						name: 'Get',
-						value: 'get',
-						description: 'Get data of an order'
+						name: "Get",
+						value: "get",
+						description: "Get data of an order"
 					}
 				],
-				default: 'create',
-				description: 'The operation to perform.'
+				default: "create",
+				description: "The operation to perform."
 			},
 
 			// ----------------------------------
 			//         order:create
 			// ----------------------------------
 			{
-				displayName: 'Data',
-				name: 'data',
-				type: 'string',
+				displayName: "Data",
+				name: "data",
+				type: "string",
 				displayOptions: {
 					show: {
-						operation: ['create'],
-						resource: ['order']
+						operation: ["create"],
+						resource: ["order"]
 					}
 				},
-				default: '',
+				default: "",
 				required: true,
-				description: 'Data of the order to create.'
+				description: "Data of the order to create."
 			},
 
 			// ----------------------------------
 			//         order:update
 			// ----------------------------------
 			{
-				displayName: 'Data',
-				name: 'data',
-				type: 'string',
+				displayName: "Data",
+				name: "data",
+				type: "string",
 				displayOptions: {
 					show: {
-						operation: ['update'],
-						resource: ['order']
+						operation: ["update"],
+						resource: ["order"]
 					}
 				},
-				default: '',
+				default: "",
 				required: false,
-				description: 'Data of the order to create.'
+				description: "Data of the order to create."
 			},
 
 			// ----------------------------------
 			//         order:get
-			// ----------------------------------			
+			// ----------------------------------
 			{
-				displayName: 'Data',
-				name: 'data',
-				type: 'string',
+				displayName: "Data",
+				name: "data",
+				type: "string",
 				displayOptions: {
 					show: {
-						operation: ['get'],
-						resource: ['order']
+						operation: ["get"],
+						resource: ["order"]
 					}
 				},
-				default: '',
+				default: "",
 				required: false,
-				description: 'Data of the order to create.'
+				description: "Data of the order to create."
 			},
 
 			// ----------------------------------
-			//         addresses
+			//         address
 			// ----------------------------------
 			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
+				displayName: "Operation",
+				name: "operation",
+				type: "options",
 				displayOptions: {
 					show: {
-						resource: ['addresses']
+						resource: ["address"]
 					}
 				},
 				options: [
 					{
-						name: 'Get All',
-						value: 'getAll',
-						description: 'Get the address list'
+						name: "Get All",
+						value: "getAll",
+						description: "Call up the address list"
 					},
 					{
-						name: 'Get by ID',
-						value: 'getById',
-						description: 'Get single address by its ID'
+						name: "Get by ID",
+						value: "getById",
+						description: "Get individual addresses"
+					},
+					{
+						name: "Create",
+						value: "create",
+						description: "Create new address"
+					},
+					{
+						name: "Update",
+						value: "update",
+						description: "Edit address"
 					}
 				],
-				default: 'getById',
-				description: 'retrieve addresses'
+				default: "getAll",
+				description: "Call up the address list"
 			},
 
 			// ----------------------------------
-			//         addresses:getById
+			//         address: getById
 			// ----------------------------------
 			{
-				displayName: 'ID',
-				name: 'id',
-				type: 'number',
+				displayName: "ID",
+				name: "id",
+				type: "string",
 				displayOptions: {
 					show: {
-						operation: ['getById'],
-						resource: ['addresses']
+						operation: ["getById"],
+						resource: ["address"]
 					}
 				},
-				default: 0,
+				default: 1,
 				required: true,
-				description: 'Get a single address'
+				description: "Address Id"
+			},
+
+			// ----------------------------------
+			//         address: create
+			// ----------------------------------
+
+			{
+				displayName: "Type",
+				name: "type",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "firma",
+				required: true,
+				description: "e.g company"
+			},
+			{
+				displayName: "Language",
+				name: "language",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "deutsch",
+				required: true,
+				description: "e.g Deutsch"
+			},
+			{
+				displayName: "Name",
+				name: "name",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g Max Muster"
+			},
+			{
+				displayName: "Land",
+				name: "land",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g DE"
+			},
+			{
+				displayName: "Address",
+				name: "address",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g Musterstrasse 6"
+			},
+			{
+				displayName: "Place",
+				name: "place",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g Musterdorf"
+			},
+			{
+				displayName: "Postcode",
+				name: "postcode",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g 12345"
+			},
+			{
+				displayName: "Phone",
+				name: "phone",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g 0821123456789"
+			},
+			{
+				displayName: "Fax",
+				name: "fax",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g 0821123456789"
+			},
+			{
+				displayName: "Email",
+				name: "email",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g info@maxmuellermuster.de"
+			},
+			{
+				displayName: "Project",
+				name: "project",
+				type: "number",
+				displayOptions: {
+					show: {
+						operation: ["create"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: true,
+				description: "e.g 1"
+			},
+
+			// ----------------------------------
+			//         address: update
+			// ----------------------------------
+	{
+				displayName: "ID",
+				name: "id",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: 1,
+				required: true,
+				description: "e.g company"
+			},
+			{
+				displayName: "Type",
+				name: "type",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "firma",
+				required: false,
+				description: "e.g company"
+			},
+			{
+				displayName: "Language",
+				name: "language",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "deutsch",
+				required: false,
+				description: "e.g Deutsch"
+			},
+			{
+				displayName: "Name",
+				name: "name",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g Max Muster"
+			},
+			{
+				displayName: "Land",
+				name: "land",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g DE"
+			},
+			{
+				displayName: "Address",
+				name: "address",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g Musterstrasse 6"
+			},
+			{
+				displayName: "Place",
+				name: "place",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g Musterdorf"
+			},
+			{
+				displayName: "Postcode",
+				name: "postcode",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g 12345"
+			},
+			{
+				displayName: "Phone",
+				name: "phone",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g 0821123456789"
+			},
+			{
+				displayName: "Fax",
+				name: "fax",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g 0821123456789"
+			},
+			{
+				displayName: "Email",
+				name: "email",
+				type: "string",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g info@maxmuellermuster.de"
+			},
+			{
+				displayName: "Project",
+				name: "project",
+				type: "number",
+				displayOptions: {
+					show: {
+						operation: ["update"],
+						resource: ["address"]
+					}
+				},
+				default: "",
+				required: false,
+				description: "e.g 1"
 			}
 		]
 	};
@@ -221,71 +560,97 @@ export class Xentral implements INodeType {
 		let endpoint: string;
 
 		for (let i = 0; i < items.length; i++) {
-			requestMethod = 'GET';
-			endpoint = '';
+			requestMethod = "GET";
+			endpoint = "";
 			body = {} as IDataObject;
 
-			resource = this.getNodeParameter('resource', 0) as string;
-			operation = this.getNodeParameter('operation', 0) as string;
+			resource = this.getNodeParameter("resource", 0) as string;
+			operation = this.getNodeParameter("operation", 0) as string;
 
-			if (resource === 'order') {
-				if (operation === 'create') {
+			if (resource === "order") {
+				if (operation === "create") {
 					// ----------------------------------
 					//         create
 					// ----------------------------------
-					requestMethod = 'POST';
-					endpoint = '/api/AuftragCreate';
+					requestMethod = "POST";
+					endpoint = "/api/AuftragCreate";
 
 					body = {
-						data: this.getNodeParameter('data', i) as object
+						data: JSON.parse(
+							this.getNodeParameter("data", i) as string
+						) as object
 					} as IDataObject;
-
-					body = prepareBodyOldApi(body);
-
-				} else if (operation === 'update') {
+				} else if (operation === "update") {
 					// ----------------------------------
 					//         update
 					// ----------------------------------
-					requestMethod = 'POST';
-					endpoint = '/api/AuftragEdit';
+					requestMethod = "POST";
+					endpoint = "/api/AuftragEdit";
 
 					body = {
-						data: this.getNodeParameter('data', i) as object
+						data: JSON.parse(
+							this.getNodeParameter("data", i) as string
+						) as object
 					} as IDataObject;
-
-					body = prepareBodyOldApi(body);
-
-				} else if (operation === 'get') {
+				} else if (operation === "get") {
 					// ----------------------------------
 					//         get
 					// ----------------------------------
-					requestMethod = 'POST';
-					endpoint = '/api/AuftragGet';
+					requestMethod = "POST";
+					endpoint = "/api/AuftragGet";
 
 					body = {
-						data: this.getNodeParameter('data', i) as object
+						data: JSON.parse(
+							this.getNodeParameter("data", i) as string
+						) as object
 					} as IDataObject;
-
-					body = prepareBodyOldApi(body);
-
 				} else {
 					throw new Error(`The operation '${operation}' is not known!`);
 				}
+			} else if (resource === "address") {
+				if (operation === "getAll") {
+					requestMethod = "GET";
 
-			} else if (resource === 'addresses') {
-				if (operation === 'getAll') {
-					requestMethod = 'GET';
+					endpoint = "/api/v1/adressen";
+				} else if (operation === "getById") {
+					requestMethod = "GET";
 
-					endpoint = '/api/v1/adressen';
-
-				} else if (operation === 'getById') {
-					requestMethod = 'GET';
-
-					const id = this.getNodeParameter('id', i) as number;
+					const id = this.getNodeParameter("id", i) as number;
 					endpoint = `/api/v1/adressen/${id}`;
+				} else if (operation === "create") {
+					requestMethod = "POST";
 
+					body.type = this.getNodeParameter("type", i) as string;
+					body.language = this.getNodeParameter("language", i) as string;
+					body.name = this.getNodeParameter("name", i) as string;
+					body.land = this.getNodeParameter("land", i) as string;
+					body.address = this.getNodeParameter("address", i) as string;
+					body.place = this.getNodeParameter("place", i) as string;
+					body.postcode = this.getNodeParameter("postcode", i) as string;
+					body.phone = this.getNodeParameter("phone", i) as string;
+					body.fax = this.getNodeParameter("fax", i) as string;
+					body.email = this.getNodeParameter("email", i) as string;
+					body.project = this.getNodeParameter("project", i) as string;
+
+					endpoint = "/api/v1/adressen";
+				} else if (operation === "update") {
+					requestMethod = "PUT";
+
+					body.type = this.getNodeParameter("type", i) as string;
+					body.language = this.getNodeParameter("language", i) as string;
+					body.name = this.getNodeParameter("name", i) as string;
+					body.land = this.getNodeParameter("land", i) as string;
+					body.address = this.getNodeParameter("address", i) as string;
+					body.place = this.getNodeParameter("place", i) as string;
+					body.postcode = this.getNodeParameter("postcode", i) as string;
+					body.phone = this.getNodeParameter("phone", i) as string;
+					body.fax = this.getNodeParameter("fax", i) as string;
+					body.email = this.getNodeParameter("email", i) as string;
+					body.project = this.getNodeParameter("project", i) as string;
+
+					const id = this.getNodeParameter("id", i) as number;
+					endpoint = `/api/v1/adressen/${id}`;
 				}
-
 			} else {
 				throw new Error(`The resource '${resource}' is not known!`);
 			}
