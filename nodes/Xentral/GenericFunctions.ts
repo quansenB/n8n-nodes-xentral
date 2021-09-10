@@ -19,7 +19,7 @@ import { OptionsWithUri } from 'request';
  * @returns {Promise<any>}
  */
 export async function xentralRequest(this: IHookFunctions | IExecuteFunctions, method: string, endpoint: string, body: IDataObject, query?: IDataObject): Promise<any> { // tslint:disable-line:no-any
-	const credentials = this.getCredentials('xentral');
+	const credentials = await this.getCredentials('xentral');
 	if (credentials === undefined) {
 		throw new Error('No credentials got returned!');
 	}
@@ -57,7 +57,7 @@ export async function xentralRequest(this: IHookFunctions | IExecuteFunctions, m
 		return responseData;
 
 
-	} catch (error) {
+	} catch (error: any) {
 		if (error.statusCode === 403) {
 			// Return a clear error
 			throw new Error('The Xentral credentials are not valid!');
@@ -78,7 +78,7 @@ export async function xentralRequest(this: IHookFunctions | IExecuteFunctions, m
  * @returns {Promise<any>}
  */
 export async function xentralRequestOldApi(this: IHookFunctions | IExecuteFunctions, method: string, endpoint: string, body: IDataObject): Promise<any> { // tslint:disable-line:no-any
-	const credentials = this.getCredentials('xentral');
+	const credentials = await this.getCredentials('xentral');
 	if (credentials === undefined) {
 		throw new Error('No credentials got returned!');
 	}
@@ -116,7 +116,7 @@ export async function xentralRequestOldApi(this: IHookFunctions | IExecuteFuncti
 		return responseData;
 
 
-	} catch (error) {
+	} catch (error: any) {
 		if (error.statusCode === 403) {
 			// Return a clear error
 			throw new Error('The Xentral credentials are not valid!');
